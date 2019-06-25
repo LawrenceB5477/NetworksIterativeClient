@@ -9,7 +9,7 @@ public class Client {
     private int clients = -1;
     private Scanner scanner;
     private int threadId;
-    private ClientRunnable[] clientThreads;
+    private ClientRunnable[] clientRunnables;
     private Thread[] threadpool;
 
     public Client() {
@@ -59,7 +59,7 @@ public class Client {
         while (!collected) {
             //Get IP address
             if (this.serverAddress == null) {
-                System.out.println("Please enter the IP address you would like to send a request to: ");
+                System.out.print("Please enter the IP address you would like to send a request to: ");
                 String address = this.scanner.nextLine();
                 try {
                     this.serverAddress = InetAddress.getByName(address);
@@ -123,12 +123,12 @@ public class Client {
 
 
         //holy shit this is awful code
-        this.clientThreads = new ClientRunnable[this.clients];
+        this.clientRunnables = new ClientRunnable[this.clients];
         this.threadpool = new Thread[this.clients];
 
         for (int i = 0; i < this.clients; i++) {
-            this.clientThreads[i] = new ClientRunnable(this.serverAddress, this.port, this.threadId++, this.request);
-            this.threadpool[i] = new Thread(this.clientThreads[i]);
+            this.clientRunnables[i] = new ClientRunnable(this.serverAddress, this.port, this.threadId++, this.request);
+            this.threadpool[i] = new Thread(this.clientRunnables[i]);
         }
 
         for (Thread thread : this.threadpool) {
@@ -143,16 +143,18 @@ public class Client {
             }
         }
 
-        System.out.println("All threads have finished!");
+        System.out.println();
+        System.out.println("All threads have finished!\n");
 
         long totalTime = 0;
-        for (ClientRunnable client : this.clientThreads) {
-            System.out.println(client.getThreadID() + " has been running for " + client.getRunningTime() + " milliseconds");
+        for (ClientRunnable client : this.clientRunnables) {
+            System.out.println("Client " + client.getThreadID() + " ran for " + client.getRunningTime() + " milliseconds");
+            System.out.println(client.getServerResponse() + "\n");
             totalTime += client.getRunningTime();
         }
 
         System.out.println("Total elapsed time: " + totalTime + " milliseconds");
-        System.out.println("Average elapsed time: " + totalTime / this.clients + " milliseconds");
+        System.out.println("Average elapsed time: " + totalTime / (double) this.clients + " milliseconds");
     }
 
 
